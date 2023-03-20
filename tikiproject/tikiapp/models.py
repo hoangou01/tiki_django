@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
+from ckeditor.fields import RichTextField
 # Create your models here.
 
 
@@ -12,7 +12,8 @@ class Account (AbstractUser):
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
     refreshToken = models.CharField(max_length=200)
-    role = models.CharField(max_length=45 , null=False)
+    is_seller = models.BooleanField(default=False)
+    is_customer = models.BooleanField(default=False)
     def __str__(self):
         return self.user_name
 
@@ -26,7 +27,7 @@ class Customer (models.Model):
     def __str__(self):
         return self.fullname
 class Seller (models.Model):
-    description = models.TextField(max_length=200 , null=True)
+    description = RichTextField(null=True)
     name = models.CharField(max_length=45 , null=False , unique=True)
     phone = models.CharField(max_length=20 , null=True , unique=True)
     address = models.CharField(max_length=45 , null=True)
@@ -43,7 +44,10 @@ class Category (models.Model):
     image = models.ImageField(upload_to='Category/%Y/%m', default=None , null=True)
     def __str__(self):
         return self.categoryname
-
+    def image_tag(self):
+        from django.utils.html import mark_safe
+        return mark_safe('<img src="/static%s" width="50px" height="50px" />' % (self.image.url))
+    image.short_description = 'Image'
 class List_Categoies(models.Model):
     name = models.CharField(max_length=45 , null=False , unique=True)
     category = models.ForeignKey(Category , on_delete=models.SET_NULL , null=True)
@@ -55,7 +59,7 @@ class Product (models.Model):
     base_price = models.DecimalField(max_digits=9 , decimal_places=2)
     product_sku = models.CharField(max_length=45 , null=True)
     image = models.ImageField(upload_to='Product/%Y/%m', default=None , null=True)
-    description = models.TextField(max_length=200, null=True)
+    description = RichTextField(null=True)
     is_deleted = models.BooleanField(default=False)
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
