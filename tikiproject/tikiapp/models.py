@@ -6,16 +6,15 @@ from ckeditor.fields import RichTextField
 
 class Account (AbstractUser):
 
-    user_name = models.EmailField(max_length=50 , null=False , unique= True)
     password = models.CharField(max_length=100 , null=False)
     image = models.ImageField(upload_to='Account/%Y/%m' , default=None , null=True)
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
-    refreshToken = models.CharField(max_length=200)
     is_seller = models.BooleanField(default=False)
     is_customer = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     def __str__(self):
-        return self.user_name
+        return self.username
 
 class Customer (models.Model):
 
@@ -23,7 +22,7 @@ class Customer (models.Model):
     address = models.CharField(max_length=80 , null=False)
     gender = models.CharField(max_length=20 , null=True)
     DOB = models.DateField()
-    account = models.ForeignKey(Account , on_delete=models.RESTRICT , null=False)
+    account = models.OneToOneField(Account , related_name='customer_set', on_delete=models.RESTRICT , null=False)
     def __str__(self):
         return self.fullname
 class Seller (models.Model):
@@ -33,7 +32,7 @@ class Seller (models.Model):
     address = models.CharField(max_length=45 , null=True)
     isOfficial = models.BooleanField(default=False)
     isChecked = models.BooleanField(default=False)
-    account = models.ForeignKey(Account , on_delete=models.RESTRICT , null=False)
+    account = models.OneToOneField(Account ,  related_name='seller_set', on_delete=models.RESTRICT , null=False)
     def __str__(self):
         return self.name
 
@@ -50,7 +49,7 @@ class Category (models.Model):
     image.short_description = 'Image'
 class List_Categoies(models.Model):
     name = models.CharField(max_length=45 , null=False , unique=True)
-    category = models.ForeignKey(Category , on_delete=models.SET_NULL , null=True)
+    category = models.ForeignKey(Category , related_name='category_set', on_delete=models.SET_NULL , null=True)
     sellers = models.ManyToManyField(Seller , related_name='list_categories' , through='Product')
     def __str__(self):
         return self.name

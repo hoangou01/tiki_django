@@ -27,7 +27,17 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS':
+    'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 2,
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+    )
+}
 # Application definition
 
 INSTALLED_APPS = [
@@ -39,7 +49,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'tikiapp.apps.TikiappConfig',
     'ckeditor',
-    'ckeditor_uploader'
+    'ckeditor_uploader',
+    'rest_framework',
+    'oauth2_provider',
 ]
 AUTH_USER_MODEL = 'tikiapp.Account'
 MIDDLEWARE = [
@@ -127,3 +139,6 @@ CKEDITOR_UPLOAD_PATH = "Product/"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# client_id ='ZUEjLQ0wSM1ZIC40hRUM9e8RdbSoEvBCEGA2mqk0'
+# client_secret = 't3ywLX5zOiVwWeay8QoE2j4mTbk3Jgp5bjWiao2queaGard3QXFV1hddsMvOb8wGOI20Py5u2MxkhBUijxIlnUgunClVwR7biEKhejSNh2RCJkoVIhYFeK9UmLZZFznA'
