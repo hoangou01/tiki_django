@@ -55,9 +55,9 @@ class SellerForm(forms.ModelForm):
         fields = '__all__'
 class SellerAdmin(admin.ModelAdmin):
     form = SellerForm
-    list_display = ['id' , 'name' , 'phone' , 'address' , 'isOfficial' , 'isChecked' , 'account']
+    list_display = ['id' , 'name' , 'phone' , 'address' , 'isOfficial' , 'is_active' , 'account']
     search_fields = ['name' , 'phone' , 'address' ,'account__username' ]
-    list_filter = ['isOfficial' , 'isChecked']
+    list_filter = ['isOfficial' , 'is_active']
 admin.site.register(Seller , SellerAdmin)
 
 class CustomerAdmin(admin.ModelAdmin):

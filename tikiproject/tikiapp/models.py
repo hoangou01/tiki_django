@@ -31,7 +31,8 @@ class Seller (models.Model):
     phone = models.CharField(max_length=20 , null=True , unique=True)
     address = models.CharField(max_length=45 , null=True)
     isOfficial = models.BooleanField(default=False)
-    isChecked = models.BooleanField(default=False)
+
+
     account = models.OneToOneField(Account ,  related_name='seller_set', on_delete=models.RESTRICT , null=False)
     def __str__(self):
         return self.name
@@ -59,10 +60,10 @@ class Product (models.Model):
     product_sku = models.CharField(max_length=45 , null=True)
     image = models.ImageField(upload_to='Product/%Y/%m', default=None , null=True)
     description = RichTextField(null=True)
-    is_deleted = models.BooleanField(default=False)
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
     category_name = models.CharField(max_length=45 , null=True)
+    is_active = models.BooleanField(default=False)
     categoryDetail = models.ForeignKey(List_Categoies , related_name= 'product', on_delete=models.RESTRICT , null=False)
     seller = models.ForeignKey(Seller ,related_name= 'product' , on_delete=models.RESTRICT , null=False)
     def __str__(self):
@@ -85,8 +86,7 @@ class Product_detail (models.Model):
     image = models.ImageField(upload_to='Product/%Y/%m', default=None)
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
-    is_deleted = models.BooleanField(default=False)
-    active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=False)
     product = models.ForeignKey(Product , related_name='product_detail' , on_delete=models.RESTRICT , null=False)
     option = models.ForeignKey(Option , related_name='product_detail' , on_delete=models.RESTRICT , null=False)
     account = models.ManyToManyField(Account , related_name='product_detail' , through='Evaluate')
@@ -119,7 +119,7 @@ class Order (models.Model):
     total = models.DecimalField(max_digits=9 , decimal_places=2)
     status = models.CharField(max_length=40 , null=False)
     account = models.ForeignKey(Account , on_delete=models.RESTRICT , null=False)
-    is_deleted = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     productDetail = models.ManyToManyField(Product_detail , related_name='order' , through='Order_item')
 class Order_item (models.Model):
     quantity = models.IntegerField(null=False)

@@ -52,6 +52,7 @@ class CategorySerializer(HyperlinkedModelSerializer):
         fields = ['id' , 'categoryname' , 'image']
 
 class ListCategorySerializer(ModelSerializer):
+    category = CategorySerializer()
     class Meta:
         model = List_Categoies
         fields = ['id' , 'name' , 'category']

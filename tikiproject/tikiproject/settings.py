@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'ckeditor_uploader',
     'rest_framework',
     'oauth2_provider',
+    'drf_yasg',
 ]
 AUTH_USER_MODEL = 'tikiapp.Account'
 MIDDLEWARE = [
