@@ -44,7 +44,7 @@ class ProductAdmin(admin.ModelAdmin):
 admin.site.register(Product , ProductAdmin)
 
 class ProductDetailAdmin(admin.ModelAdmin):
-    list_display = ['id' , 'name' , 'price' , 'quantity' , 'salable_quantity','active' , 'product' , 'option']
+    list_display = ['id' , 'name' , 'price' , 'quantity' , 'salable_quantity' , 'product' , 'option']
     search_fields = ['name' , 'price' , 'quantity', 'product__name' , 'option__name']
 admin.site.register(Product_detail , ProductDetailAdmin)
 
@@ -55,9 +55,9 @@ class SellerForm(forms.ModelForm):
         fields = '__all__'
 class SellerAdmin(admin.ModelAdmin):
     form = SellerForm
-    list_display = ['id' , 'name' , 'phone' , 'address' , 'isOfficial' , 'is_active' , 'account']
+    list_display = ['id' , 'name' , 'phone' , 'address' , 'isOfficial' , 'account']
     search_fields = ['name' , 'phone' , 'address' ,'account__username' ]
-    list_filter = ['isOfficial' , 'is_active']
+    list_filter = ['isOfficial']
 admin.site.register(Seller , SellerAdmin)
 
 class CustomerAdmin(admin.ModelAdmin):
