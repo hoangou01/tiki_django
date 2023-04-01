@@ -1,20 +1,25 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from ckeditor.fields import RichTextField
+from django.conf import  settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 # Create your models here.
 
 
 class Account (AbstractUser):
 
-    password = models.CharField(max_length=100 , null=False)
     image = models.ImageField(upload_to='Account/%Y/%m' , default=None , null=True)
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
     is_seller = models.BooleanField(default=False)
-    is_customer = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
+    is_customer = models.BooleanField(default=False , null=False)
+    is_active = models.BooleanField(default=False , null=False)
     def __str__(self):
         return self.username
+@receiver(post_save , sender = settings.AUTH_USER_MODEL)
+def create_auth_token(sender , instance=None,created =False , **kwargs):
+    pass
 
 class Customer (models.Model):
 
@@ -30,9 +35,7 @@ class Seller (models.Model):
     name = models.CharField(max_length=45 , null=False , unique=True)
     phone = models.CharField(max_length=20 , null=True , unique=True)
     address = models.CharField(max_length=45 , null=True)
-    isOfficial = models.BooleanField(default=False)
-
-
+    is_official = models.BooleanField(default=False)
     account = models.OneToOneField(Account ,  related_name='seller_set', on_delete=models.RESTRICT , null=False)
     def __str__(self):
         return self.name
@@ -41,7 +44,7 @@ class Seller (models.Model):
 class Category (models.Model):
 
     categoryname = models.CharField(max_length=45 , null=False , unique=True)
-    image = models.ImageField(upload_to='Category/%Y/%m', default=None , null=True)
+    image = models.ImageField(upload_to='Category/%Y/%m', null=True, blank=True )
     def __str__(self):
         return self.categoryname
     def image_tag(self):

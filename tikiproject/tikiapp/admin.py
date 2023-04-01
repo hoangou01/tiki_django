@@ -14,9 +14,9 @@ class CategoryAdmin(admin.ModelAdmin):
     list_display = ['id' , 'categoryname' , 'image_tag']
     search_fields = ['categoryname']
     # readonly_fields = ['image']
-    # def image(self):
-    #     return mark_safe(
-    #             "<img src='/static/{img_url}' />".format(img_url=self.image.url))
+    def image(self , category):
+        return mark_safe(
+                "<img src='/static/{img_url}' />".format(img_url=category.image.name))
 admin.site.register(Category ,CategoryAdmin)
 class Option_groupAdmin(admin.ModelAdmin):
     list_display = ['id' , 'name']
@@ -55,9 +55,9 @@ class SellerForm(forms.ModelForm):
         fields = '__all__'
 class SellerAdmin(admin.ModelAdmin):
     form = SellerForm
-    list_display = ['id' , 'name' , 'phone' , 'address' , 'isOfficial' , 'account']
+    list_display = ['id' , 'name' , 'phone' , 'address' , 'is_official' , 'account']
     search_fields = ['name' , 'phone' , 'address' ,'account__username' ]
-    list_filter = ['isOfficial']
+    list_filter = ['is_official']
 admin.site.register(Seller , SellerAdmin)
 
 class CustomerAdmin(admin.ModelAdmin):

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer , HyperlinkedModelSerializer,Serializer
-from .models import Category, List_Categoies,Product, Account , Seller , Customer
+from .models import Category, List_Categoies,Product, Account , Seller , Customer , Evaluate,Product_detail
 
 class AccountSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
@@ -57,8 +57,32 @@ class ListCategorySerializer(ModelSerializer):
         model = List_Categoies
         fields = ['id' , 'name' , 'category']
 
+    def productDetails(self, request, pk):
+        c = self.get_object()
+        lessons = c.lesson_set.filter(active=True)
+
+        kw = request.query_params.get('kw')
+        if kw:
+            lessons = lessons.filter(subject__icontains=kw)
+
+        return Response(LessonSerializer(lessons, many=True).data)
+
 class ProductSerializer(ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id' , 'name' , 'category']
+        fields = ['id' , 'name' , 'base_price','product_sku','image','description','created_date','updated_date','is_active']
+
+
+class EvaluateSerializer (ModelSerializer):
+    class Meta:
+        model = Evaluate
+        fields = ['id' , 'content' , 'rate' , 'created_date' , 'updated_date' , 'account']
+
+class ProductDetailSerializer(ModelSerializer):
+
+    evaluaties = EvaluateSerializer(many = True)
+    class Meta:
+        model = Product_detail
+        fields = ['id' , 'name' , 'price','quantity','salable_quantity','image','created_date','updated_date','is_active','evaluaties']
+

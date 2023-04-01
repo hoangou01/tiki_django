@@ -69,8 +69,13 @@ class ListCategoryViewSet (viewsets.ModelViewSet):
         cd = self.get_object()
         products = cd.category_set.all()
         return Response(ListCategorySerializer(products, context={'request': request}, many=True).data)
-class AccountViewSet(viewsets.ViewSet , generics.CreateAPIView , generics.UpdateAPIView, generics.RetrieveAPIView):
-    queryset = Account.objects.filter(is_active=True)
+
+class BrandViewSet (viewsets.ModelViewSet , generics.ListAPIView):
+    queryset = Seller.objects.filter(is_official = True)
+    serializer_class = SellerSerializer
+    pagination_class = None
+class AccountViewSet(viewsets.ViewSet , generics.ListAPIView, generics.CreateAPIView , generics.UpdateAPIView, generics.RetrieveAPIView):
+    queryset = Account.objects.all()
     serializer_class = AccountSerializer
     pagination_class = None
     parser_classes = [MultiPartParser, ]
@@ -86,3 +91,24 @@ class AccountViewSet(viewsets.ViewSet , generics.CreateAPIView , generics.Update
     def CurrentUser(self, request):
         return Response(AccountSerializer(request.account).data)
 
+
+
+class sellerViewSet (viewsets.ModelViewSet , generics.ListAPIView , generics.CreateAPIView , generics.RetrieveAPIView):
+    queryset = Seller.objects.all()
+    serializer_class = SellerSerializer
+    pagination_class = None
+    def get_permissions(self):
+        if self.action in ['update', 'create', 'partial_update']:
+            return [permissions.IsAuthenticated()]
+
+        return [permissions.AllowAny()]
+
+class customerViewSet (viewsets.ModelViewSet , generics.ListAPIView , generics.CreateAPIView , generics.RetrieveAPIView):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
+    pagination_class = None
+    def get_permissions(self):
+        if self.action in ['update', 'create', 'partial_update']:
+            return [permissions.IsAuthenticated()]
+
+        return [permissions.AllowAny()]

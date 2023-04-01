@@ -56,6 +56,8 @@ INSTALLED_APPS = [
     "corsheaders",
 ]
 AUTH_USER_MODEL = 'tikiapp.Account'
+ACCOUNT_UNIQUE_EMAIL = True
+APPEND_SLASH = False
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -136,9 +138,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = 'static/'
 MEDIA_ROOT = '%s/tikiapp/static/' % BASE_DIR
-CKEDITOR_UPLOAD_PATH = "Product/"
+CKEDITOR_UPLOAD_PATH = "ckeditors/tikiapp/"
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
