@@ -6,24 +6,13 @@ from rest_framework import viewsets, permissions , generics,parsers
 from django.http import HttpResponse
 from django.views import View
 from rest_framework.parsers import MultiPartParser
-from .models import Category,List_Categoies,Account,Seller ,Customer,Product,Product_detail
+from .models import Category,Account,Product
 from rest_framework.decorators import action
 from rest_framework.views import Response
-from .serializers import CategorySerializer, ListCategorySerializer ,AccountSerializer,SellerSerializer,CustomerSerializer
+from .serializers import CategorySerializer,AccountSerializer , ProductSerializer
 
 
 # Create your views here.
-
-def index(request):
-    return HttpResponse("hihi")
-def welcome(request , year):
-    return HttpResponse("hello" + str(year))
-
-class TestView(View):
-    def get(self , request):
-        return HttpResponse("hihi")
-    def post(self , request):
-        pass
 
 class CategoryViewSet (viewsets.ModelViewSet, generics.UpdateAPIView, generics.ListAPIView):
     queryset = Category.objects.all()
@@ -37,42 +26,30 @@ class CategoryViewSet (viewsets.ModelViewSet, generics.UpdateAPIView, generics.L
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
     # list categories
-    @action(methods=['get'], detail=True, url_path='listcategories',url_name='listcategories')
-    def ListCategories(self,request , pk):
-        c = self.get_object()
-        ListCategories = c.category_set.all()
-        return Response(ListCategorySerializer(ListCategories,context={'request':request}, many=True).data)
 
     @action(methods=['get'], detail=True, url_path='products', url_name='products')
     def products(self, request, pk):
         cd = self.get_object()
         products = cd.category_set.all()
-        return Response(ListCategorySerializer(products, context={'request': request}, many=True).data)
+        return Response(ProductSerializer(products, context={'request': request}, many=True).data)
 
 class ProductViewSet(viewsets.ViewSet , generics.ListAPIView , generics.UpdateAPIView , generics.RetrieveAPIView):
-    queryset = Product.objects.all()
-    serializer_class = CategorySerializer
-    pass
-
-class ListCategoryViewSet (viewsets.ModelViewSet):
-    queryset = List_Categoies.objects.all()
-    serializer_class = ListCategorySerializer
-    pagination_class = None
-    # permission_classes = [permissions.IsAuthenticated]
+    queryset = Product.objects.filter(is_active = True)
+    serializer_class = ProductSerializer
     def get_permissions(self):
-        if self.action in ['create' ,'update', 'partial_update']:
-            return [permissions.IsAuthenticated()]
+        if self.action in['list']:
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
 
-        return [permissions.AllowAny()]
-    @action(methods=['get'], detail=True, url_path='products', url_name='products')
-    def products(self, request, pk):
-        cd = self.get_object()
-        products = cd.category_set.all()
-        return Response(ListCategorySerializer(products, context={'request': request}, many=True).data)
+class SellerViewSet (viewsets.ViewSet , generics.RetrieveAPIView,generics.UpdateAPIView):
+    queryset = Account.objects.filter(is_seller = True)
+    serializer_class = AccountSerializer
+    pagination_class = None
+    permission_classes =  permissions.IsAuthenticated
 
 class BrandViewSet (viewsets.ModelViewSet , generics.ListAPIView):
-    queryset = Seller.objects.filter(is_official = True)
-    serializer_class = SellerSerializer
+    queryset = Account.objects.filter(is_seller = True , is_official = True)
+    serializer_class = AccountSerializer
     pagination_class = None
 class AccountViewSet(viewsets.ViewSet , generics.ListAPIView, generics.CreateAPIView , generics.UpdateAPIView, generics.RetrieveAPIView):
     queryset = Account.objects.all()
@@ -93,22 +70,3 @@ class AccountViewSet(viewsets.ViewSet , generics.ListAPIView, generics.CreateAPI
 
 
 
-class sellerViewSet (viewsets.ModelViewSet , generics.ListAPIView , generics.CreateAPIView , generics.RetrieveAPIView):
-    queryset = Seller.objects.all()
-    serializer_class = SellerSerializer
-    pagination_class = None
-    def get_permissions(self):
-        if self.action in ['update', 'create', 'partial_update']:
-            return [permissions.IsAuthenticated()]
-
-        return [permissions.AllowAny()]
-
-class customerViewSet (viewsets.ModelViewSet , generics.ListAPIView , generics.CreateAPIView , generics.RetrieveAPIView):
-    queryset = Customer.objects.all()
-    serializer_class = CustomerSerializer
-    pagination_class = None
-    def get_permissions(self):
-        if self.action in ['update', 'create', 'partial_update']:
-            return [permissions.IsAuthenticated()]
-
-        return [permissions.AllowAny()]
