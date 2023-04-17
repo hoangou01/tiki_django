@@ -16,15 +16,18 @@ register_converter(DateConverter , 'date_type')
 router = routers.DefaultRouter()
 router.register('categories' , views.CategoryViewSet)
 
+router.register('products' , views.ProductViewSet)
+
 router.register('accounts' , views.AccountViewSet)
+
+router.register('seller' , views.SellerViewSet)
+router.register('customer' , views.CustomerViewSet)
 
 
 
 
 urlpatterns = [
     path('', include(router.urls)),
-
-
 
     # path('admin/', admin.site.urls),
 

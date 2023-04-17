@@ -71,7 +71,9 @@ MIDDLEWARE = [
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 ROOT_URLCONF = 'tikiproject.urls'
-
+# AUTHENTICATION_BACKENDS = (
+#     ('django.contrib.auth.backends.ModelBackend'),
+# )
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -87,6 +89,16 @@ TEMPLATES = [
         },
     },
 ]
+
+# LANGUAGE_CODE = 'en-us'
+#
+# TIME_ZONE = 'UTC'
+#
+# USE_I18N = True
+#
+# USE_L10N = True
+#
+# USE_TZ = True
 
 WSGI_APPLICATION = 'tikiproject.wsgi.application'
 
@@ -146,5 +158,6 @@ CKEDITOR_UPLOAD_PATH = "ckeditors/tikiapp/"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# client_id ='ZUEjLQ0wSM1ZIC40hRUM9e8RdbSoEvBCEGA2mqk0'
-# client_secret = 't3ywLX5zOiVwWeay8QoE2j4mTbk3Jgp5bjWiao2queaGard3QXFV1hddsMvOb8wGOI20Py5u2MxkhBUijxIlnUgunClVwR7biEKhejSNh2RCJkoVIhYFeK9UmLZZFznA'
+# client_id ='P1DzxRpaj9KeFVfjtYKt6r6vuUC1fpi0D39Tdv2n'
+# client_secret = 'AiL1nBbTLTVecQL5PTbCuHRuLKZN6qQgo9K0TblulO1VgFfeoSl7jL1tqEMuBy9q7BHUWsMOSlFTGeHkJ1kXdhiGo4pqSstIg2La0jgiZs1osutn4Qy0G8mwi6Q03tvD'
+OAUTH2_PROVIDER = { 'OAUTH2_BACKEND_CLASS': 'oauth2_provider.oauth2_backends.JSONOAuthLibCore' }
