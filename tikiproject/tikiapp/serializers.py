@@ -12,7 +12,7 @@ class AccountSerializer(serializers.ModelSerializer):
         return a
     class Meta:
         model = Account
-        fields = ['id' ,'username','password','image','is_seller','is_customer']
+        fields = ['id' ,'first_name','last_name','username','password','image','is_seller','is_customer']
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -45,18 +45,19 @@ class EvaluateSerializer (serializers.ModelSerializer):
         fields = ['id' , 'content' , 'rate' , 'created_date' , 'updated_date','account']
 class ProductSerializer(EvaluateSerializer):
     evaluate = EvaluateSerializer(many=True)
+    seller = AccountSerializer(many=False)
 
-    # image = serializers.SerializerMethodField(source='image')
-    # def get_image(self , obj):
-    #     request = self.context['request']
-    #     if obj.image.name.startswith('static/'):
-    #         path = "/%s" % obj.image.name
-    #     else:
-    #         path = 'static/%s' % obj.image.name
-    #     return request.build_absolute_uri(path)
+    image = serializers.SerializerMethodField(source='image')
+    def get_image(self , obj):
+        # request = self.context['request']
+        if obj.image.name.startswith('static/'):
+            path = "/%s" % obj.image.name
+        else:
+            path = 'static/%s' % obj.image.name
+        return path
     class Meta:
         model = Product
-        fields = ['id' , 'name' , 'base_price','quantity','salable_quantity','discount','product_sku','image','description','created_date','updated_date','is_active','evaluate']
+        fields = ['id' , 'name' , 'base_price','quantity','salable_quantity','discount','product_sku','image','description', 'category','seller','evaluate']
 class OrderSerializer (serializers.ModelSerializer):
 
     class Meta:

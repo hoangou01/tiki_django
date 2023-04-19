@@ -40,7 +40,7 @@ class CategoryViewSet (viewsets.ModelViewSet, generics.UpdateAPIView, generics.L
     @action(methods=['get'], detail=True, url_path='recommend-products', url_name='recommend-products')
     def recommend_product(self, request, pk):
         c = self.get_object()
-        products = c.product_set.filter(is_active=True).order_by('?')[:5]
+        products = c.product_set.filter(is_active=True).order_by('?')[:6]
         return Response(ProductSerializer(products, many=True).data)
 
 class ProductViewSet(viewsets.ModelViewSet , generics.ListAPIView , generics.UpdateAPIView , generics.RetrieveAPIView):
@@ -121,19 +121,47 @@ class OrderItemViewSet (viewsets.ModelViewSet , generics.ListAPIView , generics.
     serializer_class = OrderItemSerializer
     pagination_class = None
 
-class SellerViewSet (viewsets.ViewSet ,generics.CreateAPIView, generics.RetrieveAPIView,generics.UpdateAPIView):
+class SellerViewSet (viewsets.ViewSet , generics.ListAPIView ,generics.CreateAPIView, generics.RetrieveAPIView,generics.UpdateAPIView):
     queryset = Account.objects.filter(is_seller = True , is_customer = False)
     serializer_class = AccountSerializer
     pagination_class = None
     parser_classes = [parsers.MultiPartParser, ]
+
+    @action(methods=['get'], detail=True, url_path='products', url_name='products')
+    def get_comments(self, request, pk):
+        s = self.get_object()
+        products = s.product_seller_set.filter(is_active = True)
+
+        return Response(ProductSerializer(products, many=True).data)
     def get_permissions(self):
         if self.action in ['CurrentSeller', 'update', 'partial_update']:
             return [permissions.IsAuthenticated()]
 
         return [permissions.AllowAny()]
-    @action(methods=['get'], detail=False, url_path='your_user', url_name='your_user')
+    @action(methods=['get'], detail=False, url_path='current-user', url_name='current-user')
     def CurrentSeller(self, request):
         return Response(AccountSerializer(request.user).data)
+
+    @action(methods=['get'], detail=True, url_path='products', url_name='products')
+    def get_comments(self, request, pk):
+        s = self.get_object()
+        products = s.product_seller_set.filter(is_active = True)
+
+        return Response(ProductSerializer(products, many=True).data)
+    @action(methods=['post'], detail=True, name='post a product', url_path='products', url_name='products')
+    def products(self, request, pk):
+        account = self.get_object()
+        p = Product(description=request.data['content'],name=request.data['name'],base_price=request.data['base_price'],
+            product_sku= request.data['product_sku'],
+            quantity= request.data['quantity'],
+            salable_quantity= request.data['salable_quantity'],
+            discount= request.data['discount'],
+            image= request.data['image'],
+            category= request.data['category'],
+            account=account)
+
+        p.save()
+        return Response(ProductSerializer(p).data, status=status.HTTP_201_CREATED)
 class CustomerViewSet(viewsets.ViewSet ,generics.CreateAPIView, generics.RetrieveAPIView,generics.UpdateAPIView):
     queryset = Account.objects.filter(is_seller=True, is_customer=False)
     serializer_class = AccountSerializer
@@ -146,7 +174,7 @@ class CustomerViewSet(viewsets.ViewSet ,generics.CreateAPIView, generics.Retriev
 
         return [permissions.AllowAny()]
 
-    @action(methods=['get'], detail=False, url_path='your_user', url_name='your_user')
+    @action(methods=['get'], detail=False, url_path='current-user', url_name='current-user')
     def CurrentCustomer(self, request):
         return Response(AccountSerializer(request.user).data)
 

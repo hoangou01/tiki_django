@@ -9,7 +9,7 @@ from django.dispatch import receiver
 
 class Account (AbstractUser):
 
-    image = models.ImageField(upload_to='Account/%Y/%m' , default=None , null=True)
+    image = models.CharField( max_length=300 ,default=None , null=True)
     address = models.CharField(max_length=80 , null=True)
     gender = models.CharField(max_length=20, null=True)
     DOB = models.DateField(null=True)
@@ -55,7 +55,7 @@ class Category (models.Model):
 #
 class Product (models.Model):
     name = models.CharField(max_length=45 , null=False)
-    base_price = models.DecimalField(max_digits=9 , decimal_places=2)
+    base_price = models.DecimalField(max_digits=9 , decimal_places=0)
     product_sku = models.CharField(max_length=45 , null=True)
     quantity = models.IntegerField(null=False)
     salable_quantity = models.IntegerField(null=False)
@@ -66,7 +66,7 @@ class Product (models.Model):
     updated_date = models.DateTimeField(auto_now=True)
     category = models.ForeignKey(Category, related_name='product_set', on_delete=models.SET_NULL , null=True)
     is_active = models.BooleanField(default=False)
-    seller = models.ForeignKey(Account ,related_name= 'product' , on_delete=models.RESTRICT , null=False)
+    seller = models.ForeignKey(Account ,related_name= 'product_seller_set' , on_delete=models.RESTRICT , null=False)
     account = models.ManyToManyField(Account, related_name='evaluate_set', through='Evaluate')
     def __str__(self):
         return self.name

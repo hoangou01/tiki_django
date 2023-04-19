@@ -18,10 +18,10 @@ router.register('categories' , views.CategoryViewSet)
 
 router.register('products' , views.ProductViewSet)
 
-router.register('accounts' , views.AccountViewSet)
+# router.register('accounts' , views.AccountViewSet)
 
-router.register('seller' , views.SellerViewSet)
-router.register('customer' , views.CustomerViewSet)
+router.register('sellers' , views.SellerViewSet)
+router.register('customers' , views.CustomerViewSet)
 
 
 
