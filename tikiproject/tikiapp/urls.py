@@ -19,9 +19,11 @@ router.register('categories' , views.CategoryViewSet)
 router.register('products' , views.ProductViewSet)
 
 # router.register('accounts' , views.AccountViewSet)
-
+router.register('brands' , views.BrandViewSet)
 router.register('sellers' , views.SellerViewSet)
 router.register('customers' , views.CustomerViewSet)
+router.register('category-ramdom' , views.CategoryRamdomViewSet)
+
 
 
 

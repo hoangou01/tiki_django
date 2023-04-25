@@ -12,21 +12,11 @@ class AccountSerializer(serializers.ModelSerializer):
         return a
     class Meta:
         model = Account
-        fields = ['id' ,'first_name','last_name','username','password','image','is_seller','is_customer']
+        fields = ['id' ,'first_name','last_name','username','phone','DOB','gender','password','image','is_seller','is_customer']
         extra_kwargs = {
             'password': {'write_only': True}
         }
 
-# class SellerSerializer(serializers.ModelSerializer):
-#     account = AccountSerializer()
-#     class Meta:
-#         model = Seller
-#         fields = '__all__'
-#     def create(self, validated_data):
-#         user_data = validated_data.pop('account')
-#         user = Account.objects.create(**user_data)
-#         seller = Seller.objects.create(account= user , **validated_data)
-#         return seller
 
 # class CustomerSerializer(serializers.ModelSerializer):
 #     account = AccountSerializer()
@@ -38,13 +28,18 @@ class AccountSerializer(serializers.ModelSerializer):
 #         user = Account.objects.create(**user_data)
 #         customer = Customer.objects.create(account= user , **validated_data)
 #         return customer
+class BrandsSerializer (serializers.ModelSerializer):
+
+    class Meta:
+        model = Account
+        fields = ['id' ,'first_name','last_name','username','image','is_seller','is_official']
 class EvaluateSerializer (serializers.ModelSerializer):
     account = AccountSerializer(many=False)
     class Meta:
         model = Evaluate
         fields = ['id' , 'content' , 'rate' , 'created_date' , 'updated_date','account']
-class ProductSerializer(EvaluateSerializer):
-    evaluate = EvaluateSerializer(many=True)
+class ProductSerializer(serializers.ModelSerializer):
+    # evaluate = EvaluateSerializer(many=True)
     seller = AccountSerializer(many=False)
 
     image = serializers.SerializerMethodField(source='image')
@@ -57,7 +52,14 @@ class ProductSerializer(EvaluateSerializer):
         return path
     class Meta:
         model = Product
-        fields = ['id' , 'name' , 'base_price','quantity','salable_quantity','discount','product_sku','image','description', 'category','seller','evaluate']
+        fields = ['id' , 'name' , 'base_price','quantity','salable_quantity','discount','product_sku','image','description','is_global', 'category','seller']
+
+class ProductReportSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Product
+        fields = '__all__'
+
 class OrderSerializer (serializers.ModelSerializer):
 
     class Meta:
@@ -85,28 +87,20 @@ class CartSerializer (serializers.ModelSerializer):
 
 
 
-class CategorySerializer(HyperlinkedModelSerializer):
+class CategorySerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField(source='image')
     def get_image(self , obj):
-        request = self.context['request']
+        # request = self.context['request']
         if obj.image.name.startswith('static/'):
             path = "/%s" % obj.image.name
         else:
             path = 'static/%s' % obj.image.name
-        return request.build_absolute_uri(path)
+        return path
     class Meta:
         model = Category
         fields = ['id' , 'categoryname' , 'image']
 
-    def products(self, request, pk):
-        c = self.get_object()
-        products = c.product_set.filter(active=True)
 
-        kw = request.query_params.get('kw')
-        if kw:
-            products = products.filter(name__icontains=kw)
-
-        return Response(ProductSerializer(Product, many=True).data)
 
 
 

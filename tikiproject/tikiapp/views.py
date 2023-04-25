@@ -1,16 +1,17 @@
+from django.db.models import Count
 from django.db.models.signals import post_save
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from django.shortcuts import render
 from rest_framework import viewsets, permissions, generics, parsers, status
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.views import View
 from .paginators import ProductPaginator, BrandPaginator,EvaluatePaginator
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from .models import Category,Account,Product,Evaluate,Order , Order_item , Cart_item , Cart
 from rest_framework.decorators import action
 from rest_framework.views import Response
-from .serializers import CategorySerializer,AccountSerializer , ProductSerializer,EvaluateSerializer,OrderSerializer , OrderItemSerializer,CartSerializer,CartItemSerializer
+from .serializers import CategorySerializer,AccountSerializer , ProductSerializer,EvaluateSerializer,OrderSerializer , OrderItemSerializer,CartSerializer,CartItemSerializer,BrandsSerializer,ProductReportSerializer
 
 
 
@@ -35,6 +36,7 @@ class CategoryViewSet (viewsets.ModelViewSet, generics.UpdateAPIView, generics.L
     def products(self, request, pk):
         c = self.get_object()
         products = c.product_set.filter(is_active = True)
+
         return Response(ProductSerializer(products, many=True).data)
 
     @action(methods=['get'], detail=True, url_path='recommend-products', url_name='recommend-products')
@@ -42,20 +44,43 @@ class CategoryViewSet (viewsets.ModelViewSet, generics.UpdateAPIView, generics.L
         c = self.get_object()
         products = c.product_set.filter(is_active=True).order_by('?')[:6]
         return Response(ProductSerializer(products, many=True).data)
-
+class CategoryRamdomViewSet(viewsets.ModelViewSet , generics.ListAPIView ,  generics.RetrieveAPIView):
+    queryset = Category.objects.all().order_by('?')[:5]
+    serializer_class = CategorySerializer
+    pagination_class = None
 class ProductViewSet(viewsets.ModelViewSet , generics.ListAPIView , generics.UpdateAPIView , generics.RetrieveAPIView):
-    parser_classes = (MultiPartParser,FormParser,JSONParser)
-    queryset = Product.objects.filter(is_active = True)
+    # parser_classes = (MultiPartParser,FormParser,JSONParser)
+    queryset = Product.objects.filter(is_active = True).order_by('-id')
     serializer_class = ProductSerializer
     pagination_class = ProductPaginator
     def filter_queryset(self, queryset):
         kw = self.request.query_params.get('kw')
+
         if self.action.__eq__('list') and kw:
             queryset = queryset.filter(name__icontains=kw)
 
         cate_id = self.request.query_params.get('category_id')
         if cate_id:
             queryset = queryset.filter(category_id=cate_id)
+
+        # rate = self.request.query_params.get('rate')
+        # if rate:
+        #     queryset = queryset.filter(category_id=cate_id)
+
+        priceFrom = self.request.query_params.get('priceFrom')
+        priceTo = self.request.query_params.get('priceTo')
+        # if priceTo is None:
+        #     queryset = queryset.filter(base_price__gte=priceFrom)
+
+        if priceFrom and priceTo:
+            queryset = queryset.filter(base_price__gte=priceFrom,base_price__lt=priceTo)
+
+
+        sortStatus = self.request.query_params.get('sortStatus')
+        if sortStatus == 'ACS':
+            queryset = queryset.order_by('base_price')
+        else:
+            queryset = queryset.order_by('-base_price')
 
         return queryset
     def get_permissions(self):
@@ -77,9 +102,9 @@ class ProductViewSet(viewsets.ModelViewSet , generics.ListAPIView , generics.Upd
     @action(methods=['post'], detail=True, name='post a comment' ,url_path='evaluates', url_name='evaluates')
     def comments(self, request, pk):
         product = self.get_object()
-        c = Evaluate(content=request.data['content'], product=product)
-        c.save()
-        return Response(EvaluateSerializer(c).data, status=status.HTTP_201_CREATED)
+        e = Evaluate(content=request.data['content'], rate = request.data['rate'], product=product , seller = request.user)
+        e.save()
+        return Response(EvaluateSerializer(e).data, status=status.HTTP_201_CREATED)
     @action(methods=['get'], detail=True, url_path='evaluations', url_name='evaluations')
     def get_comments(self, request, pk):
         paginate_by = 2
@@ -90,9 +115,9 @@ class ProductViewSet(viewsets.ModelViewSet , generics.ListAPIView , generics.Upd
 
 
 class BrandViewSet (viewsets.ModelViewSet , generics.ListAPIView):
-    queryset = Account.objects.filter(is_seller = True , is_official = True)
-    serializer_class = AccountSerializer
-    pagination_class = BrandPaginator
+    queryset = Account.objects.filter(is_seller = True , is_official = False)
+    serializer_class = BrandsSerializer
+    pagination_class = None
 class CartViewSet(viewsets.ModelViewSet , generics.RetrieveAPIView , generics.CreateAPIView , generics.UpdateAPIView):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
@@ -148,28 +173,35 @@ class SellerViewSet (viewsets.ViewSet , generics.ListAPIView ,generics.CreateAPI
         products = s.product_seller_set.filter(is_active = True)
 
         return Response(ProductSerializer(products, many=True).data)
+
+    @action(methods=['get'], detail=True, url_path='report-product', url_name='report-product')
+    def report_product(self, request, pk):
+        s = self.get_object()
+        products = s.product_seller_set.values('category__categoryname').annotate(Count('id'))
+
+        return Response(products)
     @action(methods=['post'], detail=True, name='post a product', url_path='products', url_name='products')
     def products(self, request, pk):
-        account = self.get_object()
-        p = Product(description=request.data['content'],name=request.data['name'],base_price=request.data['base_price'],
+        seller = self.get_object()
+        p = Product(description=request.data['description'],name=request.data['name'],base_price=request.data['base_price'],
             product_sku= request.data['product_sku'],
             quantity= request.data['quantity'],
             salable_quantity= request.data['salable_quantity'],
             discount= request.data['discount'],
             image= request.data['image'],
             category= request.data['category'],
-            account=account)
+            seller = request.data['seller'])
 
         p.save()
-        return Response(ProductSerializer(p).data, status=status.HTTP_201_CREATED)
+        return Response(ProductSerializer(p, context={'request': request}).data, status=status.HTTP_201_CREATED)
 class CustomerViewSet(viewsets.ViewSet ,generics.CreateAPIView, generics.RetrieveAPIView,generics.UpdateAPIView):
-    queryset = Account.objects.filter(is_seller=True, is_customer=False)
+    queryset = Account.objects.filter(is_seller=False, is_customer=True)
     serializer_class = AccountSerializer
     pagination_class = None
     parser_classes = [parsers.MultiPartParser, ]
 
     def get_permissions(self):
-        if self.action in ['CurrentCustomer', 'update', 'partial_update']:
+        if self.action in ['retrieve', 'update', 'partial_update']:
             return [permissions.IsAuthenticated()]
 
         return [permissions.AllowAny()]
@@ -210,5 +242,12 @@ class AccountViewSet(viewsets.ViewSet , generics.CreateAPIView , generics.Update
         return Response(AccountSerializer(request.account).data)
 
 
+class ProductReportView(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    pagination_class = None
 
+    def get_queryset(self):
+        data = Product.objects.annotate(count=Count('id')).values()
+        return data
 

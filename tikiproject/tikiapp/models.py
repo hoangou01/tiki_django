@@ -68,6 +68,7 @@ class Product (models.Model):
     is_active = models.BooleanField(default=False)
     seller = models.ForeignKey(Account ,related_name= 'product_seller_set' , on_delete=models.RESTRICT , null=False)
     account = models.ManyToManyField(Account, related_name='evaluate_set', through='Evaluate')
+    is_global = models.BooleanField(default=False)
     def __str__(self):
         return self.name
 

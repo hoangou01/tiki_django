@@ -8,4 +8,4 @@ class BrandPaginator(pagination.PageNumberPagination):
     page_size = 5
 
 class EvaluatePaginator(pagination.PageNumberPagination):
-    page_size = 5
+    page_size = 2
